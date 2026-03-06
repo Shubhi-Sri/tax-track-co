@@ -14,7 +14,157 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      invoices: {
+        Row: {
+          cgst: number
+          created_at: string
+          gst_rate: number
+          id: string
+          igst: number
+          invoice_number: string
+          order_id: string
+          sgst: number
+          status: string
+          total_amount: number
+        }
+        Insert: {
+          cgst?: number
+          created_at?: string
+          gst_rate?: number
+          id?: string
+          igst?: number
+          invoice_number: string
+          order_id: string
+          sgst?: number
+          status?: string
+          total_amount?: number
+        }
+        Update: {
+          cgst?: number
+          created_at?: string
+          gst_rate?: number
+          id?: string
+          igst?: number
+          invoice_number?: string
+          order_id?: string
+          sgst?: number
+          status?: string
+          total_amount?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "invoices_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      orders: {
+        Row: {
+          customer_name: string
+          gst_amount: number
+          id: string
+          order_date: string
+          order_status: string
+          order_total: number
+          product: string | null
+          shopify_order_id: string
+          store_id: string
+        }
+        Insert: {
+          customer_name: string
+          gst_amount?: number
+          id?: string
+          order_date?: string
+          order_status?: string
+          order_total?: number
+          product?: string | null
+          shopify_order_id: string
+          store_id: string
+        }
+        Update: {
+          customer_name?: string
+          gst_amount?: number
+          id?: string
+          order_date?: string
+          order_status?: string
+          order_total?: number
+          product?: string | null
+          shopify_order_id?: string
+          store_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "orders_store_id_fkey"
+            columns: ["store_id"]
+            isOneToOne: false
+            referencedRelation: "stores"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      profiles: {
+        Row: {
+          business_name: string | null
+          created_at: string
+          currency: string | null
+          email: string | null
+          gstin: string | null
+          id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          business_name?: string | null
+          created_at?: string
+          currency?: string | null
+          email?: string | null
+          gstin?: string | null
+          id?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          business_name?: string | null
+          created_at?: string
+          currency?: string | null
+          email?: string | null
+          gstin?: string | null
+          id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      stores: {
+        Row: {
+          created_at: string
+          id: string
+          shopify_access_token: string
+          shopify_store_name: string
+          status: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          shopify_access_token: string
+          shopify_store_name: string
+          status?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          shopify_access_token?: string
+          shopify_store_name?: string
+          status?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
