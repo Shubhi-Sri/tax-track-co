@@ -3,22 +3,20 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Plus, Download } from "lucide-react";
-
-const invoices = [
-  { number: "INV-2026-042", client: "TrendyDrops Store", amount: "₹45,000", gst: "₹8,100", status: "Paid" },
-  { number: "INV-2026-041", client: "GadgetHub Store", amount: "₹32,000", gst: "₹5,760", status: "Pending" },
-  { number: "INV-2026-040", client: "FashionVault Store", amount: "₹28,500", gst: "₹5,130", status: "Paid" },
-  { number: "INV-2026-039", client: "HomeEssentials Store", amount: "₹18,000", gst: "₹3,240", status: "Overdue" },
-  { number: "INV-2026-038", client: "TrendyDrops Store", amount: "₹52,000", gst: "₹9,360", status: "Paid" },
-];
+import { useInvoices } from "@/hooks/useInvoices";
 
 const statusColors: Record<string, string> = {
   Paid: "bg-success/10 text-success",
   Pending: "bg-warning/10 text-warning",
   Overdue: "bg-destructive/10 text-destructive",
+  Draft: "bg-muted text-muted-foreground",
 };
 
 export default function Invoices() {
+  const { data: invoices, isLoading } = useInvoices();
+
+  const fmt = (n: number) => `₹${n.toLocaleString("en-IN", { maximumFractionDigits: 0 })}`;
+
   return (
     <div className="space-y-6 animate-fade-in">
       <div className="flex items-center justify-between">
@@ -45,12 +43,16 @@ export default function Invoices() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {invoices.map((inv) => (
-                <TableRow key={inv.number}>
-                  <TableCell className="font-medium text-foreground">{inv.number}</TableCell>
-                  <TableCell className="text-foreground">{inv.client}</TableCell>
-                  <TableCell className="text-foreground">{inv.amount}</TableCell>
-                  <TableCell className="text-muted-foreground">{inv.gst}</TableCell>
+              {isLoading ? (
+                <TableRow><TableCell colSpan={6} className="text-center text-muted-foreground py-8">Loading...</TableCell></TableRow>
+              ) : !invoices?.length ? (
+                <TableRow><TableCell colSpan={6} className="text-center text-muted-foreground py-8">No invoices yet</TableCell></TableRow>
+              ) : invoices.map((inv) => (
+                <TableRow key={inv.id}>
+                  <TableCell className="font-medium text-foreground">{inv.invoice_number}</TableCell>
+                  <TableCell className="text-foreground">{(inv as any).orders?.stores?.shopify_store_name || "—"}</TableCell>
+                  <TableCell className="text-foreground">{fmt(inv.total_amount)}</TableCell>
+                  <TableCell className="text-muted-foreground">{fmt(inv.cgst + inv.sgst + inv.igst)}</TableCell>
                   <TableCell>
                     <Badge variant="secondary" className={`border-0 ${statusColors[inv.status] || ""}`}>
                       {inv.status}
