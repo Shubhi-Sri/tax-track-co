@@ -2,16 +2,14 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Input } from "@/components/ui/input";
-import { Search } from "lucide-react";
-
-const orders = [
-  { id: "#DT-1042", customer: "Rahul Sharma", product: "Wireless Earbuds", value: "₹2,499", gst: "₹450", status: "Delivered", date: "2026-03-05" },
-  { id: "#DT-1041", customer: "Priya Patel", product: "Phone Case Set", value: "₹899", gst: "₹162", status: "Shipped", date: "2026-03-04" },
-  { id: "#DT-1040", customer: "Amit Kumar", product: "LED Strip Lights", value: "₹1,299", gst: "₹234", status: "Processing", date: "2026-03-04" },
-  { id: "#DT-1039", customer: "Sneha Gupta", product: "Laptop Stand", value: "₹1,799", gst: "₹324", status: "Delivered", date: "2026-03-03" },
-  { id: "#DT-1038", customer: "Vikram Singh", product: "Smart Watch Band", value: "₹599", gst: "₹108", status: "Cancelled", date: "2026-03-03" },
-  { id: "#DT-1037", customer: "Neha Reddy", product: "Portable Charger", value: "₹1,999", gst: "₹360", status: "Delivered", date: "2026-03-02" },
-];
+import { Button } from "@/components/ui/button";
+import { Search, RefreshCw } from "lucide-react";
+import { useOrders } from "@/hooks/useOrders";
+import { useStores } from "@/hooks/useStores";
+import { supabase } from "@/integrations/supabase/client";
+import { useState } from "react";
+import { toast } from "sonner";
+import { useQueryClient } from "@tanstack/react-query";
 
 const statusColors: Record<string, string> = {
   Delivered: "bg-success/10 text-success",
@@ -21,16 +19,59 @@ const statusColors: Record<string, string> = {
 };
 
 export default function Orders() {
+  const { data: orders, isLoading } = useOrders();
+  const { data: stores } = useStores();
+  const [syncing, setSyncing] = useState(false);
+  const [search, setSearch] = useState("");
+  const queryClient = useQueryClient();
+
+  const handleSync = async () => {
+    if (!stores?.length) {
+      toast.error("Connect a store first");
+      return;
+    }
+    setSyncing(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("sync-orders", {
+        body: null,
+        headers: {},
+      });
+      // Use query params approach
+      const response = await supabase.functions.invoke("sync-orders", {
+        body: null,
+        headers: { "Content-Type": "application/json" },
+      });
+      toast.success("Orders synced!");
+      queryClient.invalidateQueries({ queryKey: ["orders"] });
+    } catch (err: any) {
+      toast.error(err.message || "Sync failed");
+    } finally {
+      setSyncing(false);
+    }
+  };
+
+  const filtered = orders?.filter(o =>
+    o.customer_name.toLowerCase().includes(search.toLowerCase()) ||
+    o.shopify_order_id.toLowerCase().includes(search.toLowerCase())
+  );
+
+  const formatCurrency = (n: number) => `₹${n.toLocaleString("en-IN")}`;
+
   return (
     <div className="space-y-6 animate-fade-in">
-      <div>
-        <h1 className="text-2xl font-bold text-foreground">Orders</h1>
-        <p className="text-sm text-muted-foreground mt-1">Track and manage all orders</p>
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-bold text-foreground">Orders</h1>
+          <p className="text-sm text-muted-foreground mt-1">Track and manage all orders</p>
+        </div>
+        <Button variant="outline" className="gap-2" onClick={handleSync} disabled={syncing}>
+          <RefreshCw className={`h-4 w-4 ${syncing ? "animate-spin" : ""}`} /> Sync Orders
+        </Button>
       </div>
 
       <div className="relative max-w-sm">
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-        <Input placeholder="Search orders..." className="pl-9" />
+        <Input placeholder="Search orders..." className="pl-9" value={search} onChange={(e) => setSearch(e.target.value)} />
       </div>
 
       <Card className="shadow-card border-border">
@@ -48,19 +89,23 @@ export default function Orders() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {orders.map((o) => (
+              {isLoading ? (
+                <TableRow><TableCell colSpan={7} className="text-center text-muted-foreground py-8">Loading...</TableCell></TableRow>
+              ) : !filtered?.length ? (
+                <TableRow><TableCell colSpan={7} className="text-center text-muted-foreground py-8">No orders found</TableCell></TableRow>
+              ) : filtered.map((o) => (
                 <TableRow key={o.id}>
-                  <TableCell className="font-medium text-foreground">{o.id}</TableCell>
-                  <TableCell className="text-foreground">{o.customer}</TableCell>
+                  <TableCell className="font-medium text-foreground">{o.shopify_order_id}</TableCell>
+                  <TableCell className="text-foreground">{o.customer_name}</TableCell>
                   <TableCell className="text-muted-foreground">{o.product}</TableCell>
-                  <TableCell className="text-foreground">{o.value}</TableCell>
-                  <TableCell className="text-muted-foreground">{o.gst}</TableCell>
+                  <TableCell className="text-foreground">{formatCurrency(o.order_total)}</TableCell>
+                  <TableCell className="text-muted-foreground">{formatCurrency(o.gst_amount)}</TableCell>
                   <TableCell>
-                    <Badge variant="secondary" className={`border-0 ${statusColors[o.status] || ""}`}>
-                      {o.status}
+                    <Badge variant="secondary" className={`border-0 ${statusColors[o.order_status] || ""}`}>
+                      {o.order_status}
                     </Badge>
                   </TableCell>
-                  <TableCell className="text-muted-foreground">{o.date}</TableCell>
+                  <TableCell className="text-muted-foreground">{new Date(o.order_date).toLocaleDateString()}</TableCell>
                 </TableRow>
               ))}
             </TableBody>

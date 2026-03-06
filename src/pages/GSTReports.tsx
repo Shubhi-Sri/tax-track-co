@@ -2,22 +2,25 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Download } from "lucide-react";
-
-const gstSummary = [
-  { label: "Output GST", value: "₹2,24,244" },
-  { label: "Input GST", value: "₹1,31,844" },
-  { label: "Net GST Payable", value: "₹92,400" },
-];
-
-const monthlyReports = [
-  { month: "March 2026", revenue: "₹7,10,000", collected: "₹1,27,800", paid: "₹74,200", payable: "₹53,600" },
-  { month: "February 2026", revenue: "₹5,80,000", collected: "₹1,04,400", paid: "₹62,100", payable: "₹42,300" },
-  { month: "January 2026", revenue: "₹4,20,000", collected: "₹75,600", paid: "₹48,900", payable: "₹26,700" },
-  { month: "December 2025", revenue: "₹6,20,000", collected: "₹1,11,600", paid: "₹67,800", payable: "₹43,800" },
-  { month: "November 2025", revenue: "₹5,10,000", collected: "₹91,800", paid: "₹55,400", payable: "₹36,400" },
-];
+import { useGSTReport } from "@/hooks/useGSTReport";
 
 export default function GSTReports() {
+  const { data: report, isLoading } = useGSTReport();
+
+  const fmt = (n: number) => `₹${n.toLocaleString("en-IN", { maximumFractionDigits: 0 })}`;
+
+  const gstSummary = report
+    ? [
+        { label: "Output GST", value: fmt(report.summary.outputGST) },
+        { label: "Input GST", value: fmt(report.summary.inputGST) },
+        { label: "Net GST Payable", value: fmt(report.summary.netPayable) },
+      ]
+    : [
+        { label: "Output GST", value: "₹0" },
+        { label: "Input GST", value: "₹0" },
+        { label: "Net GST Payable", value: "₹0" },
+      ];
+
   return (
     <div className="space-y-6 animate-fade-in">
       <div className="flex items-center justify-between">
@@ -48,19 +51,23 @@ export default function GSTReports() {
               <TableRow>
                 <TableHead>Month</TableHead>
                 <TableHead>Revenue</TableHead>
-                <TableHead>GST Collected</TableHead>
-                <TableHead>GST Paid</TableHead>
-                <TableHead>GST Payable</TableHead>
+                <TableHead>CGST</TableHead>
+                <TableHead>SGST</TableHead>
+                <TableHead>IGST</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
-              {monthlyReports.map((r) => (
+              {isLoading ? (
+                <tr><td colSpan={5} className="text-center text-muted-foreground py-8">Loading...</td></tr>
+              ) : !report?.monthly?.length ? (
+                <tr><td colSpan={5} className="text-center text-muted-foreground py-8">No GST data yet</td></tr>
+              ) : report.monthly.map((r) => (
                 <TableRow key={r.month}>
                   <TableCell className="font-medium text-foreground">{r.month}</TableCell>
-                  <TableCell className="text-foreground">{r.revenue}</TableCell>
-                  <TableCell className="text-foreground">{r.collected}</TableCell>
-                  <TableCell className="text-foreground">{r.paid}</TableCell>
-                  <TableCell className="font-semibold text-foreground">{r.payable}</TableCell>
+                  <TableCell className="text-foreground">{fmt(r.revenue)}</TableCell>
+                  <TableCell className="text-foreground">{fmt(r.cgst)}</TableCell>
+                  <TableCell className="text-foreground">{fmt(r.sgst)}</TableCell>
+                  <TableCell className="font-semibold text-foreground">{fmt(r.igst)}</TableCell>
                 </TableRow>
               ))}
             </TableBody>

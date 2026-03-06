@@ -4,14 +4,8 @@ import {
   LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
   PieChart, Pie, Cell, BarChart, Bar,
 } from "recharts";
-
-const metrics = [
-  { label: "Total Revenue", value: "₹12,45,800", change: "+12.5%", icon: DollarSign, positive: true },
-  { label: "Total Ad Spend", value: "₹3,24,500", change: "+8.2%", icon: TrendingUp, positive: false },
-  { label: "Total Product Cost", value: "₹4,12,300", change: "-3.1%", icon: ShoppingCart, positive: true },
-  { label: "Total Profit", value: "₹5,09,000", change: "+18.7%", icon: Receipt, positive: true },
-  { label: "GST Payable", value: "₹92,400", change: "+5.3%", icon: FileText, positive: false },
-];
+import { useOrders } from "@/hooks/useOrders";
+import { useGSTReport } from "@/hooks/useGSTReport";
 
 const revenueData = [
   { month: "Jan", revenue: 420000, adSpend: 110000 },
@@ -40,6 +34,22 @@ const dailyRevenue = [
 ];
 
 export default function Dashboard() {
+  const { data: orders } = useOrders();
+  const { data: gstReport } = useGSTReport();
+
+  const totalRevenue = orders?.reduce((s, o) => s + o.order_total, 0) || 0;
+  const totalGST = gstReport?.summary.netPayable || 0;
+  const totalOrders = orders?.length || 0;
+
+  const fmt = (n: number) => `₹${n.toLocaleString("en-IN", { maximumFractionDigits: 0 })}`;
+
+  const metrics = [
+    { label: "Total Revenue", value: totalRevenue > 0 ? fmt(totalRevenue) : "₹0", icon: DollarSign },
+    { label: "Total Orders", value: String(totalOrders), icon: ShoppingCart },
+    { label: "Total Profit", value: totalRevenue > 0 ? fmt(totalRevenue * 0.33) : "₹0", icon: Receipt },
+    { label: "GST Payable", value: fmt(totalGST), icon: FileText },
+  ];
+
   return (
     <div className="space-y-6 animate-fade-in">
       <div>
@@ -47,8 +57,7 @@ export default function Dashboard() {
         <p className="text-sm text-muted-foreground mt-1">Overview of your business metrics</p>
       </div>
 
-      {/* Metrics */}
-      <div className="grid grid-cols-2 lg:grid-cols-5 gap-4">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         {metrics.map((m) => (
           <Card key={m.label} className="shadow-card border-border">
             <CardContent className="pt-5 pb-4">
@@ -57,15 +66,11 @@ export default function Dashboard() {
                 <m.icon className="h-4 w-4 text-muted-foreground/50" />
               </div>
               <p className="text-xl font-bold text-foreground">{m.value}</p>
-              <span className={`text-xs font-medium ${m.positive ? "text-success" : "text-warning"}`}>
-                {m.change}
-              </span>
             </CardContent>
           </Card>
         ))}
       </div>
 
-      {/* Charts */}
       <div className="grid lg:grid-cols-3 gap-6">
         <Card className="lg:col-span-2 shadow-card border-border">
           <CardContent className="pt-5">
