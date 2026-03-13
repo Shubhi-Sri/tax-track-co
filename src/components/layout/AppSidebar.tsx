@@ -10,6 +10,7 @@ import {
   Receipt,
   Settings,
   ChevronLeft,
+  Link2,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useState } from "react";
@@ -19,6 +20,7 @@ const navItems = [
   { title: "Stores", url: "/stores", icon: Store },
   { title: "Orders", url: "/orders", icon: ShoppingCart },
   { title: "Ad Spend", url: "/ad-spend", icon: DollarSign },
+  { title: "Ad Accounts", url: "/ad-accounts", icon: Link2 },
   { title: "Profit Analytics", url: "/profit-analytics", icon: TrendingUp },
   { title: "GST Reports", url: "/gst-reports", icon: FileText },
   { title: "Invoices", url: "/invoices", icon: Receipt },

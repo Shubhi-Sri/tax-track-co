@@ -14,6 +14,101 @@ export type Database = {
   }
   public: {
     Tables: {
+      ad_accounts: {
+        Row: {
+          access_token: string
+          account_id: string
+          account_name: string | null
+          created_at: string
+          id: string
+          platform: string
+          refresh_token: string | null
+          status: string
+          token_expires_at: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          access_token: string
+          account_id: string
+          account_name?: string | null
+          created_at?: string
+          id?: string
+          platform: string
+          refresh_token?: string | null
+          status?: string
+          token_expires_at?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          access_token?: string
+          account_id?: string
+          account_name?: string | null
+          created_at?: string
+          id?: string
+          platform?: string
+          refresh_token?: string | null
+          status?: string
+          token_expires_at?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      ad_campaign_metrics: {
+        Row: {
+          account_id: string
+          campaign_id: string
+          campaign_name: string
+          clicks: number
+          conversions: number
+          cpc: number
+          created_at: string
+          ctr: number
+          date: string
+          id: string
+          impressions: number
+          spend: number
+        }
+        Insert: {
+          account_id: string
+          campaign_id: string
+          campaign_name: string
+          clicks?: number
+          conversions?: number
+          cpc?: number
+          created_at?: string
+          ctr?: number
+          date: string
+          id?: string
+          impressions?: number
+          spend?: number
+        }
+        Update: {
+          account_id?: string
+          campaign_id?: string
+          campaign_name?: string
+          clicks?: number
+          conversions?: number
+          cpc?: number
+          created_at?: string
+          ctr?: number
+          date?: string
+          id?: string
+          impressions?: number
+          spend?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ad_campaign_metrics_account_id_fkey"
+            columns: ["account_id"]
+            isOneToOne: false
+            referencedRelation: "ad_accounts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       invoices: {
         Row: {
           cgst: number
