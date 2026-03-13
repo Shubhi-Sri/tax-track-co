@@ -12,6 +12,7 @@ import Dashboard from "./pages/Dashboard";
 import Stores from "./pages/Stores";
 import Orders from "./pages/Orders";
 import AdSpend from "./pages/AdSpend";
+import AdAccounts from "./pages/AdAccounts";
 import ProfitAnalytics from "./pages/ProfitAnalytics";
 import GSTReports from "./pages/GSTReports";
 import Invoices from "./pages/Invoices";
