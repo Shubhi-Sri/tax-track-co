@@ -158,6 +158,7 @@ export type Database = {
       }
       orders: {
         Row: {
+          created_at: string | null
           customer_name: string
           gst_amount: number
           id: string
@@ -165,10 +166,15 @@ export type Database = {
           order_status: string
           order_total: number
           product: string | null
+          product_cost: number | null
+          revenue: number | null
+          shipping_cost: number | null
           shopify_order_id: string
           store_id: string
+          tax: number | null
         }
         Insert: {
+          created_at?: string | null
           customer_name: string
           gst_amount?: number
           id?: string
@@ -176,10 +182,15 @@ export type Database = {
           order_status?: string
           order_total?: number
           product?: string | null
+          product_cost?: number | null
+          revenue?: number | null
+          shipping_cost?: number | null
           shopify_order_id: string
           store_id: string
+          tax?: number | null
         }
         Update: {
+          created_at?: string | null
           customer_name?: string
           gst_amount?: number
           id?: string
@@ -187,8 +198,12 @@ export type Database = {
           order_status?: string
           order_total?: number
           product?: string | null
+          product_cost?: number | null
+          revenue?: number | null
+          shipping_cost?: number | null
           shopify_order_id?: string
           store_id?: string
+          tax?: number | null
         }
         Relationships: [
           {
@@ -237,6 +252,7 @@ export type Database = {
         Row: {
           created_at: string
           id: string
+          shop_domain: string | null
           shopify_access_token: string
           shopify_store_name: string
           status: string
@@ -245,6 +261,7 @@ export type Database = {
         Insert: {
           created_at?: string
           id?: string
+          shop_domain?: string | null
           shopify_access_token: string
           shopify_store_name: string
           status?: string
@@ -253,6 +270,7 @@ export type Database = {
         Update: {
           created_at?: string
           id?: string
+          shop_domain?: string | null
           shopify_access_token?: string
           shopify_store_name?: string
           status?: string
