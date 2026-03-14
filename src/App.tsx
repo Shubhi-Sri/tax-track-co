@@ -17,6 +17,7 @@ import ProfitAnalytics from "./pages/ProfitAnalytics";
 import GSTReports from "./pages/GSTReports";
 import Invoices from "./pages/Invoices";
 import SettingsPage from "./pages/Settings";
+import ShopifyCallback from "./pages/ShopifyCallback";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -31,6 +32,7 @@ const App = () => (
           <Routes>
             <Route path="/" element={<Landing />} />
             <Route path="/login" element={<Login />} />
+            <Route path="/shopify-callback" element={<ProtectedRoute><ShopifyCallback /></ProtectedRoute>} />
             <Route element={<ProtectedRoute><DashboardLayout /></ProtectedRoute>}>
               <Route path="/dashboard" element={<Dashboard />} />
               <Route path="/stores" element={<Stores />} />
